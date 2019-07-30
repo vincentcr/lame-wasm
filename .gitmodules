@@ -1,0 +1,3 @@
+[submodule "src/lame-svn"]
+	path = src/lame-svn
+	url = git@github.com:vincentcr/lame-svn.git
