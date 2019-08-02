@@ -16,12 +16,12 @@ describe("The Lame class", () => {
       const lame = await Lame.load();
 
       const inputPcms = await Promise.all([
-        loadPcmFixture("testdata-left.pcm"),
-        loadPcmFixture("testdata-right.pcm")
+        loadPcmFixture("input-stereo-left.pcm"),
+        loadPcmFixture("input-stereo-right.pcm")
       ]);
 
       const expectedOutput = await fs.readFile(
-        path.join(FIXTURE_DIR, "expected-out-stereo.mp3")
+        path.join(FIXTURE_DIR, "output-stereo.mp3")
       );
 
       const chunks = [];
@@ -37,10 +37,10 @@ describe("The Lame class", () => {
     it("should encode pcm buffers in mono mode", async () => {
       const lame = await Lame.load({ stereo: false });
 
-      const inputPcm = await loadPcmFixture("testdata-mono.pcm");
+      const inputPcm = await loadPcmFixture("input-mono.pcm");
 
       const expectedOutput = await fs.readFile(
-        path.join(FIXTURE_DIR, "expected-out-mono.mp3")
+        path.join(FIXTURE_DIR, "output-mono.mp3")
       );
 
       const chunks = [];
@@ -56,18 +56,18 @@ describe("The Lame class", () => {
       const lame = await Lame.load();
 
       const inputPcms = await Promise.all([
-        loadPcmFixture("testdata-left.pcm"),
-        loadPcmFixture("testdata-right.pcm")
+        loadPcmFixture("input-stereo-left.pcm"),
+        loadPcmFixture("input-stereo-right.pcm")
       ]);
 
       const expectedOutput = await fs.readFile(
-        path.join(FIXTURE_DIR, "expected-out-stereo.mp3")
+        path.join(FIXTURE_DIR, "output-stereo.mp3")
       );
 
       expect(inputPcms[0].length).to.equal(inputPcms[1].length);
 
-      // split the input in chunks of 1mb each
-      const chunkSize = 1024 * 1024;
+      // split the input in chunks of 100K each
+      const chunkSize = 100 * 1024;
       let pos = 0;
       const inputPcmsChunks: Float32Array[][] = [];
       while (pos < inputPcms[0].length) {
@@ -85,9 +85,9 @@ describe("The Lame class", () => {
         }
       }
 
-      expect(outputChunks.length).to.be.gt(20);
+      expect(outputChunks.length).to.be.gte(5);
       expect(Math.min(...outputChunks.map(c => c.length))).to.be.greaterThan(
-        500
+        5000
       );
 
       const output = Buffer.concat(outputChunks);
