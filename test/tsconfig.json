@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "lib": ["es2017"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2017",
+    "outDir": "dist"
+  },
+  "include": ["./**/*"]
+}
