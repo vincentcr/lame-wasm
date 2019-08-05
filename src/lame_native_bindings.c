@@ -20,14 +20,14 @@ typedef struct {
   bool stereo;
   // Private fields. Should not be touched by API user.
   lame_global_flags *gfp;
-} vmsg;
+} lamejs;
 
-void lamejs_free(vmsg *v);
+void lamejs_free(lamejs *v);
 
 
 WASM_EXPORT
-vmsg *lamejs_init(int rate, bool stereo, int vbr_quality) {
-  vmsg *v = calloc(1, sizeof (vmsg));
+lamejs *lamejs_init(int rate, bool stereo, int vbr_quality) {
+  lamejs *v = calloc(1, sizeof (lamejs));
   if (!v) {
     goto err;
   }
@@ -79,7 +79,7 @@ err:
 }
 
 WASM_EXPORT
-void lamejs_print_debug_info(vmsg *v) {
+void lamejs_print_debug_info(lamejs *v) {
   fprintf(stderr, "__LAMEJS (native)__ %p; pcm_left: %p (%.4f %.4f %.4f...); pcm_right: %p (%.4f %.4f %.4f...);\n",
     v, v->pcm_left, v->pcm_left[0], v->pcm_left[1], v->pcm_left[2]
     , v->pcm_right, v->pcm_right[0], v->pcm_right[1], v->pcm_right[2]);
@@ -91,7 +91,7 @@ int lamejs_max_encode_samples() {
 }
 
 WASM_EXPORT
-int lamejs_encode(vmsg *v, int nsamples) {
+int lamejs_encode(lamejs *v, int nsamples) {
   if (nsamples > MAX_SAMPLES)
     return -1;
 
@@ -100,20 +100,20 @@ int lamejs_encode(vmsg *v, int nsamples) {
 }
 
 WASM_EXPORT
-int lamejs_flush(vmsg *v) {
+int lamejs_flush(lamejs *v) {
   int n = lame_encode_flush(v->gfp, v->outbuf, BUF_SIZE);
   return n;
 }
 
 
 WASM_EXPORT
-int lamejs_tag_frame(vmsg *v) {
+int lamejs_tag_frame(lamejs *v) {
   int n = lame_get_lametag_frame(v->gfp, v->outbuf, BUF_SIZE);
   return n;
 }
 
 WASM_EXPORT
-void lamejs_free(vmsg *v) {
+void lamejs_free(lamejs *v) {
   if (v) {
     lame_close(v->gfp);
     free(v->pcm_left);
