@@ -20,7 +20,7 @@ lame_native.wasm: $(WLAME_SO) lame_native_bindings.c
 	  -I$(WDIST_DIR)/include \
 		-DNDEBUG \
 		-Oz -Os --llvm-lto 3 \
-		-s WASM=1 -s MODULARIZE=1 \
+		-s WASM=1 -s MODULARIZE=1 -s NODEJS_CATCH_EXIT=0 \
 		-s "EXPORTED_FUNCTIONS=['_lamejs_init', '_lamejs_max_encode_samples', '_lamejs_encode', '_lamejs_flush', '_lamejs_free', '_lamejs_print_debug_info', '_lamejs_tag_frame']" \
 		-o lame_native.js
 
