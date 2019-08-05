@@ -15,14 +15,12 @@ describe("The Lame class", () => {
     it("should encode pcm buffers in stereo mode", async () => {
       const lame = await Lame.load();
 
-      const inputPcms = await Promise.all([
-        loadPcmFixture("input-stereo-left.pcm"),
-        loadPcmFixture("input-stereo-right.pcm")
-      ]);
+      const inputPcms = (await loadFixtures(
+        "input-stereo-left.pcm",
+        "input-stereo-right.pcm"
+      )).map(buf => new Float32Array(buf.buffer));
 
-      const expectedOutput = await fs.readFile(
-        path.join(FIXTURE_DIR, "output-stereo.mp3")
-      );
+      const [expectedOutput] = await loadFixtures("output-stereo.mp3");
 
       const chunks = [];
       for await (const chunk of lame.encode(...inputPcms)) {
@@ -37,11 +35,11 @@ describe("The Lame class", () => {
     it("should encode pcm buffers in mono mode", async () => {
       const lame = await Lame.load({ stereo: false });
 
-      const inputPcm = await loadPcmFixture("input-mono.pcm");
-
-      const expectedOutput = await fs.readFile(
-        path.join(FIXTURE_DIR, "output-mono.mp3")
+      const [inputPcm] = (await loadFixtures("input-mono.pcm")).map(
+        buf => new Float32Array(buf.buffer)
       );
+
+      const [expectedOutput] = await loadFixtures("output-mono.mp3");
 
       const chunks = [];
       for await (const chunk of lame.encode(inputPcm)) {
@@ -55,14 +53,12 @@ describe("The Lame class", () => {
     it("should allow streaming results", async () => {
       const lame = await Lame.load();
 
-      const inputPcms = await Promise.all([
-        loadPcmFixture("input-stereo-left.pcm"),
-        loadPcmFixture("input-stereo-right.pcm")
-      ]);
+      const inputPcms = (await loadFixtures(
+        "input-stereo-left.pcm",
+        "input-stereo-right.pcm"
+      )).map(buf => new Float32Array(buf.buffer));
 
-      const expectedOutput = await fs.readFile(
-        path.join(FIXTURE_DIR, "output-stereo.mp3")
-      );
+      const [expectedOutput] = await loadFixtures("output-stereo.mp3");
 
       expect(inputPcms[0].length).to.equal(inputPcms[1].length);
 
@@ -97,8 +93,12 @@ describe("The Lame class", () => {
   });
 });
 
-async function loadPcmFixture(fname: string) {
-  const absFname = path.join(FIXTURE_DIR, fname);
-  const data = await fs.readFile(absFname);
-  return new Float32Array(data.buffer);
+function loadFixtures(...fnames: string[]) {
+  return Promise.all(
+    fnames.map(fname => {
+      const absFname = path.join(FIXTURE_DIR, fname);
+      const data = fs.readFile(absFname);
+      return data;
+    })
+  );
 }
