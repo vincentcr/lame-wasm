@@ -61,6 +61,10 @@ export class Lame {
     );
   }
 
+  public numChannels() {
+    return this.params.stereo ? 2 : 1;
+  }
+
   private getStructPointerAtOffset<T>(offset: number): Ptr {
     const ptr = new Uint32Array(
       this.memoryBuffer,
