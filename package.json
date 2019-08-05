@@ -6,7 +6,7 @@
   "types": "dist/lame.d.ts",
   "scripts": {
     "build-wasm": "cd src && make",
-    "build": "tsc && cp src/lame_native.js src/lame_native.wasm dist",
+    "build": "npm run build-wasm && tsc && cp src/lame_native.js src/lame_native.wasm dist",
     "example": "npm run build-wasm && npm run build && ts-node examples/lameTest.ts",
     "test": "mocha --recursive test/**/*.test.ts"
   },
