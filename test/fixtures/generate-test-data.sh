@@ -14,11 +14,20 @@
 
 set -e
 
-SOURCE_FILE="src.mp3"
-DEST_FILE_PFX="__new__"
 TS_RUNNER="../../node_modules/.bin/ts-node"
+SCRIPT_DIR="$(dirname "$0")"
 
-cd "$(dirname "$0")"
+if [ "$1" == "" ] ; then
+  SOURCE_FILE="$SCRIPT_DIR/src.mp3"
+else
+  SOURCE_FILE=$1
+fi
+
+SOURCE_DIR=$(cd "$(dirname "$SOURCE_FILE")"; pwd -P)
+SOURCE_FILE="${SOURCE_DIR}/$(basename "$SOURCE_FILE")"
+DEST_FILE_PFX="${SOURCE_DIR}/__new__"
+
+cd $SCRIPT_DIR
 
 ffmpeg -y  \
   -i $SOURCE_FILE  \
