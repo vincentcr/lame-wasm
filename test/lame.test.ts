@@ -90,6 +90,42 @@ describe("The Lame class", () => {
       expect(output.equals(expectedOutput)).to.be.true;
       lame.free();
     });
+
+    describe("Should reject invalid input", () => {
+      it("When an invalid number of channels is supplied (stereo mode)", async () => {
+        const lame = await Lame.load();
+        const left = new Float32Array([1.0, 0, 0.5]);
+        expect(() => Array.from(lame.encode(left))).to.throw(
+          "expected 2 channels"
+        );
+      });
+
+      it("When an invalid number of channels is supplied (mono mode)", async () => {
+        const lame = await Lame.load({ stereo: false });
+        const left = new Float32Array([1.0, 0, 0.5]);
+        expect(() => Array.from(lame.encode(left, left))).to.throw(
+          "expected 1 channels"
+        );
+      });
+
+      it("When channels do not have the same lengths", async () => {
+        const lame = await Lame.load();
+        const left = new Float32Array([1.0, 0, 0.5]);
+        const right = new Float32Array([1.0, 0, 0.5, 0.1]);
+        expect(() => Array.from(lame.encode(left, right))).to.throw(
+          "channels should all have same length"
+        );
+      });
+
+      it("When channel samples are not within [-1,1]", async () => {
+        const lame = await Lame.load();
+        const left = new Float32Array([1.0, 0, -1.0, 0.5]);
+        const right = new Float32Array([1.0, 1.1, 1, 1]);
+        expect(() => Array.from(lame.encode(left, right))).to.throw(
+          /sample data must be in range \[-1, 1\].+channels\[1\]\[1\]/
+        );
+      });
+    });
   });
 });
 

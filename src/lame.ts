@@ -74,29 +74,39 @@ export class Lame {
     return ptr;
   }
 
-  public *encode(...pcms: Float32Array[]): Iterable<Buffer> {
+  public *encode(...channels: Float32Array[]): Iterable<Buffer> {
     let elapsed = 0;
     let numChunks = 0;
     let totalEncoded = 0;
 
     const expectedNumChannels = this.params.stereo ? 2 : 1;
-    if (pcms.length !== expectedNumChannels) {
+    if (channels.length !== expectedNumChannels) {
       throw new Error(
-        `Invalid arguments: expected ${expectedNumChannels} channels. received ${pcms.length}`
+        `Invalid arguments: expected ${expectedNumChannels} channels, but received ${channels.length}`
       );
     }
 
-    const numSamples = pcms[0].length;
-    if (!pcms.every(pcm => pcm.length === numSamples)) {
-      throw new Error(
-        "Invalid arguments: channels should all have same length. Actual lengths: " +
-          pcms.map(pcm => pcm.length)
-      );
+    const numSamples = channels[0].length;
+    for (const [chanIdx, channel] of channels.entries()) {
+      if (channel.length !== numSamples) {
+        throw new Error(
+          "Invalid arguments: channels should all have same length " +
+            `but channel ${chanIdx} has size ${channel.length} and channel 0 has size ${numSamples}`
+        );
+      }
+      for (const [sampleIdx, sample] of channel.entries()) {
+        if (sample < -1 || sample > 1) {
+          throw new Error(
+            `Invalid arguments: sample data must be in range [-1, 1], ` +
+              `but channels[${chanIdx}][${sampleIdx}] == ${sample}`
+          );
+        }
+      }
     }
 
     if (this.params.debug) {
       console.debug(
-        `lame.encode: encoding ${pcms.length} channels with ${numSamples} samples each`
+        `lame.encode: encoding ${channels.length} channels with ${numSamples} samples each`
       );
     }
 
@@ -106,7 +116,7 @@ export class Lame {
       const chunkEnd = Math.min(chunkStart + this.maxEncodeSamples, numSamples);
       const chunkLength = chunkEnd - chunkStart;
 
-      for (const [i, pcm] of pcms.entries()) {
+      for (const [i, pcm] of channels.entries()) {
         const chunk = pcm.slice(chunkStart, chunkEnd);
         this.pcmBuffers[i].set(chunk);
       }
